@@ -11,6 +11,7 @@ using ChatBot;
 using HtmlAgilityPack;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 using ChatBotWin;
+using static ChatBot.Consts;
 using System.Net;
 
 namespace ChatBot
@@ -19,6 +20,8 @@ namespace ChatBot
     {
 
         public static string version = "FUNCTIONS VER 3";
+        NetUtils netUtils = new NetUtils();
+        Bot bot = null;
 
         private static Bot bot = null;
         private static Handler handler = null;
@@ -137,16 +140,16 @@ namespace ChatBot
             Function = (b) =>
             {
                 try{    
-                    string s = "";
-                    NetUtils.Resp r = NetUtils.Get("https://v1.hitokoto.cn/");
+                string s = "";
+                NetUtils.Resp r = NetUtils.Get("https://v1.hitokoto.cn/");
                     Hitokoto h = JsonSerializer.Deserialize<Hitokoto>(r.ResponseText);
-                    s += h.hitokoto + "\n";
-                    s += $"--{(string.IsNullOrEmpty(h.from_who) ? h.from : h.from_who)} {(string.IsNullOrEmpty(h.from_who) ? "" : h.from)} 类型:{h.type}";
+                s += h.hitokoto + "\n";
+                s += $"--{(string.IsNullOrEmpty(h.from_who) ? h.from : h.from_who)} {(string.IsNullOrEmpty(h.from_who) ? "" : h.from)} 类型:{h.type}";
                     return s.AsReturn();
                 }catch (Exception ex)
                 {
                     return ex.AsError();
-                }
+            }
             }
         };
 
@@ -158,48 +161,48 @@ namespace ChatBot
             Function = (b) =>
             {
                 try{    
-                    string[] a = b.args;
-                    NetUtils.Resp r = NetUtils.Get($"https://www.wordreference.com/enzh/{a[0]}");
-                    HtmlDocument d = new HtmlDocument();
-                    d.LoadHtml(r.ResponseText);
+                string[] a = b.args;
+                NetUtils.Resp r = NetUtils.Get($"https://www.wordreference.com/enzh/{a[0]}");
+                HtmlDocument d = new HtmlDocument();
+                d.LoadHtml(r.ResponseText);
 
-                    HtmlNode NodeNotFound = d.DocumentNode.SelectSingleNode("//*[@id=\"noEntryFound\"]");
-                    if (NodeNotFound != null)
-                    {
+                HtmlNode NodeNotFound = d.DocumentNode.SelectSingleNode("//*[@id=\"noEntryFound\"]");
+                if (NodeNotFound != null)
+                {
                         return NodeNotFound.InnerText.AsReturn();
-                    }
+                }
 
-                    string Result = "";
-                    HtmlNode NodeWord = d.DocumentNode.SelectSingleNode("//*[@id=\"articleHead\"]/h1");
-                    HtmlNode NodePronounce = d.DocumentNode.SelectSingleNode("//*[@id=\"pronunciation_widget\"]/div");
-                    HtmlNode NodeMeans = d.DocumentNode.SelectSingleNode("//*[@id=\"articleWRD\"]/table[1]");
+                string Result = "";
+                HtmlNode NodeWord = d.DocumentNode.SelectSingleNode("//*[@id=\"articleHead\"]/h1");
+                HtmlNode NodePronounce = d.DocumentNode.SelectSingleNode("//*[@id=\"pronunciation_widget\"]/div");
+                HtmlNode NodeMeans = d.DocumentNode.SelectSingleNode("//*[@id=\"articleWRD\"]/table[1]");
 
-                    Result += NodeWord.InnerHtml + "\n";
+                Result += NodeWord.InnerHtml + "\n";
 
-                    string s = "";
-                    foreach (HtmlNode x in NodePronounce.ChildNodes)
+                string s = "";
+                foreach (HtmlNode x in NodePronounce.ChildNodes)
+                {
+                    s += x.InnerText;
+                }
+                string[] ss = s.Split("/");
+                string type = s.Substring(0, 2);
+                Result += $"{type}:/{ss[1]}/ {(type == "UK" ? "US" : "UK")}:/{ss[3]}/\n";
+
+                foreach (HtmlNode x in NodeMeans.ChildNodes)
+                {
+                    //Console.WriteLine(x.InnerHtml);
+                    if (x.Attributes["id"] != null)
                     {
-                        s += x.InnerText;
+                        Result += $"{x.FirstChild.FirstChild.InnerHtml}({x.FirstChild.FirstChild.NextSibling.NextSibling.InnerHtml}) {x.FirstChild.NextSibling.NextSibling.FirstChild.InnerText.Replace("SCSimplified Chinese ", "")}\n";
+                        //Console.WriteLine(x.Attributes["id"]);
                     }
-                    string[] ss = s.Split("/");
-                    string type = s.Substring(0, 2);
-                    Result += $"{type}:/{ss[1]}/ {(type == "UK" ? "US" : "UK")}:/{ss[3]}/\n";
-
-                    foreach (HtmlNode x in NodeMeans.ChildNodes)
-                    {
-                        //Console.WriteLine(x.InnerHtml);
-                        if (x.Attributes["id"] != null)
-                        {
-                            Result += $"{x.FirstChild.FirstChild.InnerHtml}({x.FirstChild.FirstChild.NextSibling.NextSibling.InnerHtml}) {x.FirstChild.NextSibling.NextSibling.FirstChild.InnerText.Replace("SCSimplified Chinese ", "")}\n";
-                            //Console.WriteLine(x.Attributes["id"]);
-                        }
-                    }
-                    Console.WriteLine(Result);
+                }
+                Console.WriteLine(Result);
                     return Result.AsReturn();
                 }catch (Exception ex)
                 {
                     return ex.AsError();
-                }
+            }
             }
         };
 
@@ -228,24 +231,24 @@ namespace ChatBot
                 try{
                     MessageSequence ms = new MessageSequence();
 
-                    string picBase = "https://cn.bing.com";
-                    string linkInfo = "https://raw.onmicrosoft.cn/Bing-Wallpaper-Action/main/data/zh-CN_all.json";
+                string picBase = "https://cn.bing.com";
+                string linkInfo = "https://raw.onmicrosoft.cn/Bing-Wallpaper-Action/main/data/zh-CN_all.json";
 
-                    JsonObject j = JsonSerializer.Deserialize<JsonObject>(NetUtils.Get(linkInfo).ResponseText);
-                    JsonObject pic = j["data"].AsArray()[0].AsObject();
+                JsonObject j = JsonSerializer.Deserialize<JsonObject>(NetUtils.Get(linkInfo).ResponseText);
+                JsonObject pic = j["data"].AsArray()[0].AsObject();
 
-                    if (!(j["message"].ToString() == "ok"))
-                    {
+                if (!(j["message"].ToString() == "ok"))
+                {
                         ms.Add(ReturnTypes.STRING, j["message"]);
                         return ms.AsReturn();
-                    }
+                }
 
                     ms.Add(ReturnTypes.STRING, $"Last Update:{j["LastUpdate"]}\n");
                     ms.Add(ReturnTypes.STRING, $"Lang:{j["Language"]}\n");
                     ms.Add(ReturnTypes.IMAGE, Image.FromStream(NetUtils.Get($"{picBase}{pic["url"]}",RawStream:true).RawStream));
                     ms.Add(ReturnTypes.STRING, $"From:{pic["copyright"]}\n");
                     ms.Add(ReturnTypes.STRING, $"{pic["startdate"]}");
-
+                
                     return ms.AsReturn();
                 }catch (Exception e)
                 {
@@ -409,7 +412,7 @@ namespace ChatBot
                 throw new ArgumentNullException();
             }
             else
-            {
+        {
                 bot = b;
                 handler = h;
             }

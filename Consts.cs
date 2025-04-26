@@ -8,35 +8,35 @@ using System.Threading.Tasks;
 namespace ChatBot
 {
     
-    public struct GeoSearchResult
-    {
-        public string info { get; set; }
-        public string status { get; set; }
-        public string count { get; set; }
-        public JsonArray geocodes { get; set; }
-    }
-    public struct WeatherResult
-    {
-        public string info { get; set; }
-        public string status { get; set; }
-        public JsonArray lives{ get; set; }
-        public JsonArray forecast{ get; set; }
-    }
-    public struct Hitokoto
-    {
-        public int id { get; set; }
-        public string uuid { get; set; }
-        public string hitokoto { get; set; }
-        public string type { get; set; }
-        public string from { get; set; }
-        public string from_who { get; set; }
-        public string creator { get; set; }
-        public int length { get; set; }
+        public struct GeoSearchResult
+        {
+            public string info { get; set; }
+            public string status { get; set; }
+            public string count { get; set; }
+            public JsonArray geocodes { get; set; }
+        }
+        public struct WeatherResult
+        {
+            public string info { get; set; }
+            public string status { get; set; }
+            public JsonArray lives{ get; set; }
+            public JsonArray forecast{ get; set; }
+        }
+        public struct Hitokoto
+        {
+            public int id { get; set; }
+            public string uuid { get; set; }
+            public string hitokoto { get; set; }
+            public string type { get; set; }
+            public string from { get; set; }
+            public string from_who { get; set; }
+            public string creator { get; set; }
+            public int length { get; set; }
 
-    }
+        }
 
     public struct CommandInvoke
-    {
+        {
         public string user;
         public string[] args;
         public CommandInvoke(string user, string[] args)
@@ -47,9 +47,9 @@ namespace ChatBot
 
     }
     public enum ReturnTypes
-    {
-        STRING = 0,
-        IMAGE = 1,
+        {
+            STRING = 0,
+            IMAGE = 1,
         MSGSEQ = 2,
         VOID = 3
     }
@@ -81,30 +81,30 @@ namespace ChatBot
         public int Id;
         public int IdZ;
         public TaskState State;
-    }
-    public struct PixivImage
-    {
-        public string name;
-        public string author;
-        public int id;
-        public int pages;
-        public List<Image> img;
-    }
-        
-    public struct MessageSequence
-    {
-        public MessageSequence()
+        }
+        public struct PixivImage
         {
+            public string name;
+            public string author;
+            public int id;
+            public int pages;
+            public List<Image> img;
+        }
+        
+        public struct MessageSequence
+        {
+            public MessageSequence()
+            {
 
             elem = new List<Tuple<ReturnTypes, object>>();
-        }
+            }
         public List<Tuple<ReturnTypes,object>> elem;
-        public int Count { get => elem.Count; }
+            public int Count { get => elem.Count; }
         public int Add(ReturnTypes r,object o)
-        {
-            elem.Add(Tuple.Create(r,o));
-            return elem.Count;
+            {
+                elem.Add(Tuple.Create(r,o));
+                return elem.Count;
+            }
         }
-    }
     
 }

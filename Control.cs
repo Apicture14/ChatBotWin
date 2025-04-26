@@ -91,44 +91,44 @@ public class Bot
     public void Start()
     {
         try{    
-            MessageList = WxMainWindow.FindFirstDescendant(c => c.ByName("消息")).AsListBox();
-            ButtonSend = WxMainWindow.FindFirstDescendant(c => c.ByName("Send (S)")).AsButton();
-            InputBox = ButtonSend.Parent.Parent.Parent.FindFirstDescendant(c => c.ByControlType(ControlType.Edit)).AsTextBox();
-            if (MessageList == null)
-            {
-                throw new Exception("Failed to Get Message List");
-            }
+        MessageList = WxMainWindow.FindFirstDescendant(c => c.ByName("消息")).AsListBox();
+        ButtonSend = WxMainWindow.FindFirstDescendant(c => c.ByName("Send (S)")).AsButton();
+        InputBox = ButtonSend.Parent.Parent.Parent.FindFirstDescendant(c => c.ByControlType(ControlType.Edit)).AsTextBox();
+        if (MessageList == null)
+        {
+            throw new Exception("Failed to Get Message List");
+        }
             h = new Handler(3,3);
             h.Init(this);
-            ControlPanel.Log($"Starts to Get {InputBox.Name} Msg");
+        ControlPanel.Log($"Starts to Get {InputBox.Name} Msg");
 
 
-            Handl = MessageList.Parent.RegisterStructureChangedEvent(FlaUI.Core.Definitions.TreeScope.Subtree, (e, p, o) =>
+        Handl = MessageList.Parent.RegisterStructureChangedEvent(FlaUI.Core.Definitions.TreeScope.Subtree, (e, p, o) =>
+        {
+            ListBoxItem msg = MessageList.Items.Last().AsListBoxItem();
+            fButton user = msg.FindFirstChild().FindFirstChild(c => c.ByControlType(ControlType.Button)).AsButton();
+            if (string.IsNullOrEmpty(user.Name))
             {
-                ListBoxItem msg = MessageList.Items.Last().AsListBoxItem();
-                fButton user = msg.FindFirstChild().FindFirstChild(c => c.ByControlType(ControlType.Button)).AsButton();
-                if (string.IsNullOrEmpty(user.Name))
-                {
-                    ControlPanel.Log($"(!)Empty Name Message: {msg.Name} Returned");
-                    return;
-                }
+                ControlPanel.Log($"(!)Empty Name Message: {msg.Name} Returned");
+                return;
+            }
 
+          
 
+            if (msg.Name == LastMessage && user.Name == LastSpeaker && !msg.Name.StartsWith($"@{selfUserName} ."))
+            {
 
-                if (msg.Name == LastMessage && user.Name == LastSpeaker && !msg.Name.StartsWith($"@{selfUserName} ."))
-                {
-
-                    return;
-                }
-                else
-                {
-                    ControlPanel.Log($"{DateTime.Now.ToShortTimeString()} {user.Name} {msg.Name}");
-                    LastSpeaker = user.Name;
-                    LastMessage = msg.Name;
-                    LastTimeStamp = DateTime.Now.Ticks;
+                return;
+            }
+            else
+            {
+                ControlPanel.Log($"{DateTime.Now.ToShortTimeString()} {user.Name} {msg.Name}");
+                LastSpeaker = user.Name;
+                LastMessage = msg.Name;
+                LastTimeStamp = DateTime.Now.Ticks;
                     h.AcceptMessage(msg.Name, user.Name);
-                }
-            });
+            }
+        });
         }catch (Exception ex)
         {
             throw ex;

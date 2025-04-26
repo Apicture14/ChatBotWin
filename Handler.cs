@@ -95,7 +95,7 @@ namespace ChatBot
                                     return e.AsError(st.Elapsed.TotalSeconds);
                                 }
                                 finally
-                                {
+                            {
                                     st.Reset();
                                     semaphore.Release();
                                 }
@@ -103,7 +103,7 @@ namespace ChatBot
                             tasks.Enqueue(t);
                             /*
                             if (taskStates.Count == historyCount)
-                            {
+                                {
                                 taskStates.Remove(taskStates.Find((x)=>x.State == TaskState.Finished));
                             }
                             */
@@ -117,7 +117,7 @@ namespace ChatBot
                     }
                 }
             }
-        }
+                                }
         public async void ProcessMessage()
         {
             ReturnData d;
@@ -127,14 +127,14 @@ namespace ChatBot
                     
                     int i = taskStates.FindIndex((x)=>x.Id == t.Id);
                     if (i != -1) { TaskInfo x = taskStates.Find((x)=>x.Id==t.Id);x.State = TaskState.Processing; taskStates[i] = x; }
-
+                                
                     d = await t;
                     if (d.code != 0)
                     {
                         b.SendText(d.msg, false, "");
-                    }
-                    else
-                    {
+                            }
+                            else
+                            {
                         switch (d.type)
                         {
                             case ReturnTypes.STRING:
@@ -149,7 +149,7 @@ namespace ChatBot
                                 break;
                             case ReturnTypes.VOID:
                                 break;
-                        }
+                            }
                         if  (d.timecost != -1d)
                         {
                             b.SendText($"Operation Finished in {d.timecost}s",false,"");
@@ -159,9 +159,10 @@ namespace ChatBot
                     }
                 }
             }catch (Exception e)
-            {
+                {
                 b.SendText($"Error Occur When Depacking Return:\n{e.Message}\n{e.StackTrace}",false,"");
             }
         }
+        
     }
 }
